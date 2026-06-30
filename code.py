@@ -94,6 +94,7 @@ class MainApp:
             writer.writerows(self.hired_data)
 
     def update_listbox(self):
+        # show hired items
         self.hired_listbox.delete(0, tk.END)
         for hire in self.hired_data:
             self.hired_listbox.insert(tk.END, f"{hire['receipt']}: {hire['item']} ({hire['amount']})")
@@ -118,7 +119,7 @@ class MainApp:
         if item_amount > ITEM_AMOUNT_LIMIT:
             messagebox.showwarning("Error", f"Amount cannot exceed {ITEM_AMOUNT_LIMIT}.")
             return
-
+        # Get reciept number
         receipt = random.randint(1000000000, 9999999999)
         self.hired_data.append({'receipt': receipt, 'item': option, 'amount': item_amount})
         
@@ -135,6 +136,7 @@ class MainApp:
             messagebox.showinfo("Success", f"Hired {item_amount} {option}s. Receipt: {receipt}")
 
     def handle_delete(self):
+        # Deletes chosen reciept number
         receipt_to_remove = self.remove_item_entry.get().strip()
         if not receipt_to_remove.isdigit():
             messagebox.showwarning("Error", "That aint correct.")
@@ -153,13 +155,16 @@ class MainApp:
             messagebox.showinfo("Deleted", "item gone ya did ya code gooooood.")
 
     def show_welcome_message(self):
+        #Welcome people
         messagebox.showinfo("Welcome", "Welcome and bla bla bla ya know change when actually turn in.")
 
     def on_closing(self):
+        # If they want to close need confirmation
         if messagebox.askokcancel("Quit", "Please dont delete me man i promise ill be good."):
             self.root.destroy()
 
 if __name__ == "__main__":
+    # Runs the code
     root = tk.Tk()
     app = MainApp(root)
     root.mainloop()
