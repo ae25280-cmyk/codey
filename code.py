@@ -10,7 +10,7 @@ MAIN_FG = "#000000"
 BUTTON_BG = "#E6981A"
 BUTTON_FG = "#000000" 
 TEXT_BG = "#fffb00"
-TEXT_FG = "#0000ff"
+TEXT_FG = "#000000"
 TEXT_FONT = ("Arial", 12)
 BUTTON_FONT = ("Arial", 13)
 ITEM_AMOUNT_LIMIT = 500
@@ -159,12 +159,12 @@ class MainApp:
         messagebox.showinfo("Welcome", "Welcome and bla bla bla ya know change when actually turn in.")
 
     def on_closing(self):
-        # If they want to close need confirmation
+        # if they want to close need confirmation
         if messagebox.askokcancel("Quit", "Please dont delete me man i promise ill be good."):
             self.root.destroy()
 
 if __name__ == "__main__":
-    # Runs the code
+    #Runs the code
     root = tk.Tk()
     app = MainApp(root)
     root.mainloop()
