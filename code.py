@@ -1,10 +1,12 @@
 import tkinter as tk
+from tkinter import *
 from tkinter import messagebox
 import csv
 import os
 import random
 
-MAIN_BG = "#F7F5EF"       
+DROPDOWN_BG = "#52455D"
+MAIN_BG = "#FEF9E9"       
 MAIN_FG = "#1A1A1A"       
 BUTTON_BG = "#D9A05B"     
 BUTTON_FG = "#FFFFFF"     
@@ -15,13 +17,13 @@ BUTTON_FONT = ("Arial", 13, "bold")
 ITEM_AMOUNT_LIMIT = 500
 NAME_LENGTH_LIMIT = 30
 DATA_FILE = "party_hire_data.csv"
-DROPDOWN_BG = "#52455D"
 
 class MainApp:
     def __init__(self, root):
         # Initialization
         self.root = root
         self.root.title("Party Hire Shop")
+        self.root.iconbitmap("favicon.ico")
         self.root.geometry("420x680")
         self.root.resizable(False, False) 
         self.root.configure(bg=MAIN_BG)
@@ -35,7 +37,7 @@ class MainApp:
 
     def create_widgets(self):
         # Title
-        self.title_label = tk.Label(self.root, text="Party Hire Shop", bg=MAIN_BG, fg=MAIN_FG, font=("Arial", 18, "bold"))
+        self.title_label = tk.Label(self.root, text="🎈 Party Hire Shop 🎈", bg=MAIN_BG, fg=MAIN_FG, font=("Arial", 18, "bold"))
         self.title_label.pack(pady=15)
         
         # Name
@@ -62,7 +64,7 @@ class MainApp:
         self.item_amount_entry.bind('<Return>', self.handle_submit) 
         
         # Submit
-        self.submit_button = tk.Button(self.root, text="Submit Hire", command=self.handle_submit, bg=BUTTON_BG, fg=BUTTON_FG, font=BUTTON_FONT, cursor="hand2")
+        self.submit_button = tk.Button(self.root, text="Submit Hire", command=self.handle_submit, bg=BUTTON_BG, fg=BUTTON_FG, font=BUTTON_FONT, cursor="hand1")
         self.submit_button.pack(pady=15, ipadx=10)
 
         # Current Hires
@@ -72,7 +74,7 @@ class MainApp:
         listbox_frame = tk.Frame(self.root, bg=MAIN_BG)
         listbox_frame.pack(pady=5)
         
-        self.hired_listbox = tk.Listbox(listbox_frame, width=45, height=6, font=("Arial", 10), relief=tk.SOLID, bd=1)
+        self.hired_listbox = tk.Listbox(listbox_frame, width=50, height=10, font=("Arial", 10), relief=tk.SOLID, bd=5)
         self.scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL, command=self.hired_listbox.yview)
         self.hired_listbox.config(yscrollcommand=self.scrollbar.set)
         
@@ -85,7 +87,7 @@ class MainApp:
         self.remove_item_entry.pack(pady=5, ipady=3)
         self.remove_item_entry.bind('<Return>', self.handle_delete) 
         
-        self.remove_item_button = tk.Button(self.root, text="Return Item", command=self.handle_delete, bg=BUTTON_BG, fg=BUTTON_FG, font=BUTTON_FONT, cursor="hand2")
+        self.remove_item_button = tk.Button(self.root, text="Return Item", command=self.handle_delete, bg=BUTTON_BG, fg=BUTTON_FG, font=BUTTON_FONT, cursor="hand1")
         self.remove_item_button.pack(pady=5, ipadx=10)
 
     def load_data(self):
@@ -122,7 +124,7 @@ class MainApp:
     def update_listbox(self):
         self.hired_listbox.delete(0, tk.END)
         for hire in self.hired_data:
-            self.hired_listbox.insert(tk.END, f"{hire['receipt']}: {hire['name']} - {hire['item']} ({hire['amount']})")
+            self.hired_listbox.insert(tk.END, f"  {hire['receipt']}: {hire['name']} - {hire['item']} ({hire['amount']})")
 
     def on_listbox_select(self, event):
         selection = self.hired_listbox.curselection()
