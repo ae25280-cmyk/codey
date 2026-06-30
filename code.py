@@ -16,6 +16,7 @@ BUTTON_FONT = ("Arial", 13)
 ITEM_AMOUNT_LIMIT = 500
 NAME_LENGTH_LIMIT = 30
 DATA_FILE = "party_hire_data.csv"
+DROPDOWN_BG = "#2E004E"
 
 class MainApp:
     def __init__(self, root):
@@ -50,7 +51,7 @@ class MainApp:
         
         dropdown = tk.OptionMenu(self.root, self.selected, "Party Hat", "Bouncy Castle", "Table", "Chair", "Cake")
         dropdown.config(bg=TEXT_BG, fg=TEXT_FG, activebackground=TEXT_BG, activeforeground=TEXT_FG)
-        dropdown["menu"].config(bg="black", fg=MAIN_BG, activebackground=MAIN_BG, activeforeground=MAIN_FG)
+        dropdown["menu"].config(bg=DROPDOWN_BG, fg=MAIN_BG, activebackground=MAIN_BG, activeforeground=MAIN_FG)
         dropdown.pack(pady=15) 
 
         # Item Amount Input
