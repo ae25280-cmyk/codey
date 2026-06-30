@@ -37,13 +37,13 @@ class MainApp:
         self.title_label = tk.Label(self.root, text="Party Hire System", bg=MAIN_BG, fg=MAIN_FG, font=("Arial", 16, "bold"))
         self.title_label.pack(pady=10)
         
-        # Name
+        # Name Input
         self.name_label = tk.Label(self.root, text="Customer Name:", bg=MAIN_BG, fg=MAIN_FG, font=TEXT_FONT)
         self.name_label.pack()
         self.name_entry = tk.Entry(self.root, bg=TEXT_BG, fg=TEXT_FG, font=TEXT_FONT)
         self.name_entry.pack(pady=5)
         
-        # Item Dropdown
+        # Item Dropdown Menu
         self.selected = tk.StringVar(self.root)
         self.selected.set("Choose an item")
         
@@ -53,7 +53,7 @@ class MainApp:
         dropdown["menu"].config(bg="black", fg=MAIN_BG, activebackground=MAIN_BG, activeforeground=MAIN_FG)
         dropdown.pack(pady=15) 
 
-        # Item Amount
+        # Item Amount Input
         self.item_amount_label = tk.Label(self.root, text="Amount of Items:", bg=MAIN_BG, fg=MAIN_FG, font=TEXT_FONT)
         self.item_amount_label.pack()
         self.item_amount_entry = tk.Entry(self.root, bg=TEXT_BG, fg=TEXT_FG, font=TEXT_FONT)
@@ -66,7 +66,7 @@ class MainApp:
         # Current Hires Display Label
         tk.Label(self.root, text="Current Hires (Receipt: Name - Item x Qty):", bg=MAIN_BG, font=("Arial", 10, "bold")).pack()
         
-        # Listbox & Scrollbar
+        # Listbox & Scrollbar Frame
         listbox_frame = tk.Frame(self.root)
         listbox_frame.pack(pady=5)
         
@@ -112,7 +112,7 @@ class MainApp:
             writer.writerows(self.hired_data)
 
     def update_listbox(self):
-        # Refreshes listbox
+        # Refreshes UI listbox
         self.hired_listbox.delete(0, tk.END)
         for hire in self.hired_data:
             self.hired_listbox.insert(tk.END, f"{hire['receipt']}: {hire['name']} - {hire['item']} ({hire['amount']})")
@@ -138,7 +138,7 @@ class MainApp:
             messagebox.showwarning("Validation Error", f"Amount cannot exceed {ITEM_AMOUNT_LIMIT} units.")
             return
             
-        # Generate receipt number
+        # Generate unique receipt number
         while True:
             receipt = random.randint(1000000000, 9999999999)
             if not any(h['receipt'] == receipt for h in self.hired_data):
@@ -176,13 +176,13 @@ class MainApp:
             self.save_data()
             self.update_listbox()
             self.remove_item_entry.delete(0, tk.END)
-            messagebox.showinfo("Success", "Item has been successfully marked as returned.")
+            messagebox.showinfo("Success", "Item has been successfully returned.")
 
     def show_welcome_message(self):
-        messagebox.showinfo("Welcome", "Welcome to the Party Hire Management System.\nUse this interface to log or return customer hires.")
+        messagebox.showinfo("Welcome", "Welcome to the Party Hire Store.\nUse The interface to take out or return hires.")
 
     def on_closing(self):
-        if messagebox.askokcancel("Exit Application", "Are you sure you want to close the system?"):
+        if messagebox.askokcancel("Exit Application", "Are you sure you want to close the store?"):
             self.root.destroy()
 
 if __name__ == "__main__":
