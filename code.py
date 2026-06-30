@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import *
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import csv
 import os
 import random
@@ -18,22 +17,27 @@ ITEM_AMOUNT_LIMIT = 500
 NAME_LENGTH_LIMIT = 30
 DATA_FILE = "party_hire_data.csv"
 
+ITEMS = ["Party Hat", "Bouncy Castle", "Table", "Chair", "Cake", "Plate", "Fork", "Knife", "Gas Canister", "Pinata"]
+
 class MainApp:
     def __init__(self, root):
         # Initialization
         self.root = root
         self.root.title("Party Hire Shop")
-        self.root.iconbitmap("favicon.ico")
-        self.root.geometry("420x680")
+        try:
+            self.root.iconbitmap("favicon.ico")
+        except Exception:
+            pass 
+            
+        self.root.geometry("500x700") 
         self.root.resizable(False, False) 
         self.root.configure(bg=MAIN_BG)
         self.hired_data = [] 
         self.load_data()
         self.create_widgets()
-        self.update_listbox()
+        self.update_treeview()
         self.root.after(100, self.show_welcome_message)
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.hired_listbox.bind('<<ListboxSelect>>', self.on_listbox_select)
 
     def create_widgets(self):
         # Title
@@ -51,10 +55,10 @@ class MainApp:
         self.selected = tk.StringVar(self.root)
         self.selected.set("Choose an item")
         
-        dropdown = tk.OptionMenu(self.root, self.selected, "Party Hat", "Bouncy Castle", "Table", "Chair", "Cake", "Plate", "Fork", "Knife", "Gas Canister", "Pinata")
+        dropdown = tk.OptionMenu(self.root, self.selected, *ITEMS)
         dropdown.config(bg=TEXT_BG, fg=TEXT_FG, activebackground=TEXT_BG, activeforeground=TEXT_FG, relief=tk.SOLID, bd=1)
         dropdown["menu"].config(bg=DROPDOWN_BG, fg=MAIN_BG, activebackground=BUTTON_BG, activeforeground=TEXT_BG)
-        dropdown.pack(pady=15) 
+        dropdown.pack(pady=10) 
 
         # Item Amount
         self.item_amount_label = tk.Label(self.root, text="Amount of Items:", bg=MAIN_BG, fg=MAIN_FG, font=TEXT_FONT)
@@ -65,24 +69,39 @@ class MainApp:
         
         # Submit
         self.submit_button = tk.Button(self.root, text="Submit Hire", command=self.handle_submit, bg=BUTTON_BG, fg=BUTTON_FG, font=BUTTON_FONT, cursor="hand1")
-        self.submit_button.pack(pady=15, ipadx=10)
+        self.submit_button.pack(pady=10, ipadx=10)
 
-        # Current Hires
-        tk.Label(self.root, text="Current Hires (Click to auto-fill return):", bg=MAIN_BG, fg=MAIN_FG, font=("Arial", 10, "bold")).pack()
+        # Current Hires Header
+        tk.Label(self.root, text="Current Hires (Click row to auto-fill return):", bg=MAIN_BG, fg=MAIN_FG, font=("Arial", 10, "bold")).pack(pady=5)
         
-        # Listbox & Scrollbar 
-        listbox_frame = tk.Frame(self.root, bg=MAIN_BG)
-        listbox_frame.pack(pady=5)
+        # Treeview Config
+        tree_frame = tk.Frame(self.root, bg=MAIN_BG)
+        tree_frame.pack(pady=5, padx=10)
+
+        columns = ('receipt', 'name', 'item', 'amount')
+        self.tree = ttk.Treeview(tree_frame, columns=columns, show='headings', height=8)
         
-        self.hired_listbox = tk.Listbox(listbox_frame, width=50, height=10, font=("Arial", 10), relief=tk.SOLID, bd=5)
-        self.scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL, command=self.hired_listbox.yview)
-        self.hired_listbox.config(yscrollcommand=self.scrollbar.set)
+        self.tree.heading('receipt', text='Receipt')
+        self.tree.heading('name', text='Name')
+        self.tree.heading('item', text='Item')
+        self.tree.heading('amount', text='Qty')
         
-        self.hired_listbox.pack(side=tk.LEFT)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree.column('receipt', width=100, anchor=tk.CENTER)
+        self.tree.column('name', width=140, anchor=tk.W)
+        self.tree.column('item', width=120, anchor=tk.W)
+        self.tree.column('amount', width=50, anchor=tk.CENTER)
         
+        #  Treeview Scrollbar
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        
+        self.tree.pack(side=tk.LEFT)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
+
         # Return Item
-        tk.Label(self.root, text="Return by Receipt Number:", bg=MAIN_BG, fg=MAIN_FG, font=TEXT_FONT).pack(pady=(15, 0))
+        tk.Label(self.root, text="Return by Receipt Number:", bg=MAIN_BG, fg=MAIN_FG, font=TEXT_FONT).pack(pady=(10, 0))
         self.remove_item_entry = tk.Entry(self.root, bg=TEXT_BG, fg=TEXT_FG, font=TEXT_FONT, relief=tk.SOLID, bd=1)
         self.remove_item_entry.pack(pady=5, ipady=3)
         self.remove_item_entry.bind('<Return>', self.handle_delete) 
@@ -121,21 +140,28 @@ class MainApp:
             messagebox.showerror("File Error", f"Could not save data to database.\nReason: {e}")
             return False
 
-    def update_listbox(self):
-        self.hired_listbox.delete(0, tk.END)
-        for hire in self.hired_data:
-            self.hired_listbox.insert(tk.END, f"  {hire['receipt']}: {hire['name']} - {hire['item']} ({hire['amount']})")
+    def update_treeview(self):
+        # Clear
+        for item in self.tree.get_children():
+            self.tree.delete(item)
 
-    def on_listbox_select(self, event):
-        selection = self.hired_listbox.curselection()
+        # Sort hires alphabetically
+        sorted_hires = sorted(self.hired_data, key=lambda hire: hire["name"].lower())
+
+        # make rows clean into colums
+        for hire in sorted_hires:
+            self.tree.insert('', tk.END, values=(hire['receipt'], hire['name'], hire['item'], hire['amount']))
+
+    def on_tree_select(self, event):
+        selection = self.tree.selection()
         if not selection:
             return
             
-        listbox_text = self.hired_listbox.get(selection[0])
-        if ":" in listbox_text:
-            receipt_num = listbox_text.split(":")[0]
+        item_data = self.tree.item(selection[0])['values']
+        if item_data:
+            # Auto-fills the Receipt Number
             self.remove_item_entry.delete(0, tk.END)
-            self.remove_item_entry.insert(0, receipt_num)
+            self.remove_item_entry.insert(0, str(item_data[0]))
 
     def clear_form(self):
         self.name_entry.delete(0, tk.END)
@@ -177,7 +203,7 @@ class MainApp:
         self.hired_data.append({'receipt': receipt, 'name': name, 'item': option, 'amount': item_amount})
         
         if self.save_data():
-            self.update_listbox()
+            self.update_treeview()
             self.clear_form()
             messagebox.showinfo("Success", f"Successfully hired {option} (x{item_amount}).\nReceipt Number: {receipt}")
 
@@ -196,7 +222,7 @@ class MainApp:
             self.hired_data.remove(target_item) 
             
             if self.save_data():
-                self.update_listbox()
+                self.update_treeview()
                 self.clear_form()
                 messagebox.showinfo("Success", "Item has been successfully returned.")
             else:
